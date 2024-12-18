@@ -102,3 +102,54 @@ class DataLoader:
         self.themes_df.to_csv(f'{cleaned_path}/themes.csv')
         self.rotten_tomatoes_df.to_csv(f'{cleaned_path}/rotten_tomatoes_reviews.csv')
         self.oscar_awards_df.to_csv(f'{cleaned_path}/the_oscar_awards.csv')
+
+        from sqlalchemy import create_engine, text
+        import pandas as pd
+        import os
+        import glob
+
+        # Configurazione del database
+        DB_HOST = "localhost"
+        DB_PORT = 5432
+        DB_NAME = "your_database"
+        DB_USER = "movies"
+        DB_PASSWORD = "Frigorifero" #METTETE LA VOSTRA PASSWORD
+
+        # Directory dei CSV
+        CSV_DIR = "./normalized_tables/"
+
+        # Crea l'engine di connessione
+        engine = create_engine(f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
+
+        # Funzione per caricare i dati in una tabella
+        def load_csv_to_table(csv_path, table_name):
+            try:
+                # Leggi il CSV
+                df = pd.read_csv(csv_path)
+
+                # Carica i dati nel database
+                df.to_sql(table_name, engine, if_exists="append", index=False)
+                print(f"Dati caricati nella tabella '{table_name}' con successo.")
+
+            except Exception as e:
+                print(f"Errore durante il caricamento nella tabella '{table_name}':", e)
+
+        # Popola tutte le tabelle
+        def populate_tables():
+            try:
+                # Trova tutti i file CSV nella directory
+                for csv_file in glob.glob(os.path.join(CSV_DIR, "*.csv")):
+                    # Determina il nome della tabella dal nome del file
+                    table_name = os.path.basename(csv_file).replace(".csv", "")
+
+                    # Carica i dati dal CSV nella tabella
+                    load_csv_to_table(csv_file, table_name)
+
+                print("Tutte le tabelle sono state popolate con successo!")
+
+            except Exception as e:
+                print("Errore generale:", e)
+
+        # Esegui lo script
+        if __name__ == "__main__":
+            populate_tables()
