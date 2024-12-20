@@ -1,5 +1,7 @@
-import pandas as pd
 import os
+from sqlalchemy import create_engine, text
+import pandas as pd
+import glob
 
 
 class DataLoader:
@@ -16,6 +18,7 @@ class DataLoader:
         self.studios_df = pd.read_csv('../../dataset/studios.csv').set_index('id')
         self.themes_df = pd.read_csv('../../dataset/themes.csv').set_index('id')
 
+        '''
         # Carica il CSV Rotten Tomatoes e imposta un ID univoco concatenando 'rotten_tomatoes_link', 'critic_name' e 'review_date'
         self.rotten_tomatoes_df = pd.read_csv('../../dataset/rotten_tomatoes_reviews.csv')
 
@@ -40,6 +43,7 @@ class DataLoader:
 
         # Impostiamo 'oscar_id' come indice
         self.oscar_awards_df = self.oscar_awards_df.set_index('oscar_id')
+        '''
 
     # Metodo per ottenere i dati
     def get_data(self):
@@ -76,14 +80,16 @@ class DataLoader:
     def set_themes_df(self, themes_df):
         self.themes_df = themes_df
 
+    '''
     def set_rotten_tomatoes_df(self, rotten_tomatoes_df):
         self.rotten_tomatoes_df = rotten_tomatoes_df
 
     def set_oscar_awards_df(self, oscar_awards_df):
         self.oscar_awards_df = oscar_awards_df
+    '''
 
     # Metodo per salvare tutti i DataFrame in file CSV
-    def _save_data(self):
+    def _save_data(self, sqlalchemy=None):
         # Controlla se la cartella cleaned esiste già
         cleaned_path = '../../dataset/cleaned'
         if not os.path.exists(cleaned_path):
@@ -100,26 +106,24 @@ class DataLoader:
         self.releases_df.to_csv(f'{cleaned_path}/releases.csv')
         self.studios_df.to_csv(f'{cleaned_path}/studios.csv')
         self.themes_df.to_csv(f'{cleaned_path}/themes.csv')
-        self.rotten_tomatoes_df.to_csv(f'{cleaned_path}/rotten_tomatoes_reviews.csv')
-        self.oscar_awards_df.to_csv(f'{cleaned_path}/the_oscar_awards.csv')
+         #self.rotten_tomatoes_df.to_csv(f'{cleaned_path}/rotten_tomatoes_reviews.csv')
+        #self.oscar_awards_df.to_csv(f'{cleaned_path}/the_oscar_awards.csv')
 
-        from sqlalchemy import create_engine, text
-        import pandas as pd
-        import os
-        import glob
+
 
         # Configurazione del database
         DB_HOST = "localhost"
         DB_PORT = 5432
-        DB_NAME = "your_database"
-        DB_USER = "movies"
-        DB_PASSWORD = "Frigorifero" #METTETE LA VOSTRA PASSWORD
+        DB_NAME = "movies"
+        DB_USER = "postgres"
+        DB_PASSWORD = "postgres" #METTETE LA VOSTRA PASSWORD
 
         # Directory dei CSV
         CSV_DIR = "./normalized_tables/"
 
         # Crea l'engine di connessione
         engine = create_engine(f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
+
 
         # Funzione per caricare i dati in una tabella
         def load_csv_to_table(csv_path, table_name):
