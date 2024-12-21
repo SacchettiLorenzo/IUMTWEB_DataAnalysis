@@ -4,6 +4,7 @@ import pandas as pd
 import glob
 
 
+
 class DataLoader:
     def __init__(self):
         # Caricamento dei file CSV esistenti
